@@ -21,7 +21,7 @@ const contactLinks = [
   {
     icon: Github,
     label: 'GitHub',
-    value: 'github.com/Kevin-jt',
+    value: 'github.com/Kevin-JT',
     href: 'https://github.com/Kevin-JT',
     color: 'text-accent',
   },
