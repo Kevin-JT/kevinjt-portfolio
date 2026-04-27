@@ -7,7 +7,7 @@ export const personalInfo = {
     'Entry-level QA Engineer with hands-on expertise in Selenium automation, manual testing, and API validation. Delivering release-ready software through precision test design, rigorous defect tracking, and real Agile team experience.',
   email: 'kevinjt2004@gmail.com',
   phone: '+91 8531013918',
-  linkedin: 'https://linkedin.com/in/kevinjt2004',
+  linkedin: 'https://linkedin.com/in/kevin-jt',
   github: 'https://github.com/Kevin-JT',
   location: 'Tamil Nadu, India',
   currentlyLearning: 'Playwright',
