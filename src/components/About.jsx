@@ -19,8 +19,8 @@ export default function About() {
         <div className="reveal mb-16">
           <p className="section-label mb-3">01 / ABOUT ME</p>
           <h2 className="text-4xl md:text-5xl font-extrabold text-heading">
-            Quality is not an act,<br />
-            <span className="gradient-text">it's a habit.</span>
+            Quality isn’t about code,<br />
+            <span className="gradient-text">it’s about confidence.</span>
           </h2>
         </div>
 
