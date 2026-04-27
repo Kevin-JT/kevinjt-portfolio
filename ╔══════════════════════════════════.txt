@@ -1,0 +1,80 @@
+╔══════════════════════════════════════════════════════════════╗
+║          OPENSTREAM — UPDATED FINAL SESSION ORDER            ║
+╠══════════════════════════════════════════════════════════════╣
+
+SESSION 1 — Foundation
+MASTER FIX PROMPT
++ Part 1 (Scaffold)
++ Part 2 (Design System)
++ PROMPT A (Manifest)
+✅ App launches
+
+────────────────────────────────────────
+
+SESSION 2 — Extensions Base
+MASTER FIX PROMPT
++ Part 4F (Extensions Screen)
+✅ Extensions list visible
+
+────────────────────────────────────────
+
+SESSION 3 — Plugin Loader (CRITICAL)
+MASTER FIX PROMPT
++ PROMPT C ONLY
+✅ Content loads from extension
+
+────────────────────────────────────────
+
+SESSION 4 — Auto Update Extensions
+MASTER FIX PROMPT
++ PROMPT F
+✅ Extensions auto-update
+
+────────────────────────────────────────
+
+SESSION 5 — Onboarding + System Services
+MASTER FIX PROMPT
++ Part 5 (Onboarding)
++ Part 6A (App Update Check)
+✅ First launch flow + app update check works
+
+────────────────────────────────────────
+
+SESSION 6 — Home + Search
+MASTER FIX PROMPT
++ Part 4A (Home)
++ Part 4B (Search)
+✅ Content browsing works
+
+────────────────────────────────────────
+
+SESSION 7 — Detail + Player
+MASTER FIX PROMPT
++ Part 4C (Detail)
++ Part 4D (Player)
+✅ Streaming works
+
+────────────────────────────────────────
+
+SESSION 8 — Library + Backup System
+MASTER FIX PROMPT
++ Part 4E (Library UPDATED with Backup/Restore)
+✅ Backup & restore works
+
+────────────────────────────────────────
+
+SESSION 9 — Settings + Customization + Security
+MASTER FIX PROMPT
++ Part 4G (Settings UPDATED)
+✅ Language + UI + App Lock + Bug Report
+
+────────────────────────────────────────
+
+SESSION 10 — Stability + Build
+MASTER FIX PROMPT
++ PROMPT D (Error Handling)
++ PROMPT B (Signing)
++ PROMPT E (Final Build)
+✅ Production APK ready
+
+╚══════════════════════════════════════════════════════════════╝

@@ -1,0 +1,25 @@
+PROMPT REFERENCE
+─────────────────────────────────────────
+MASTER FIX PROMPT → Paste at start of EVERY session
+Part 1            → Project Scaffold
+Part 2            → Design System (Dark + Light theme)
+Part 3            → Built-in Legal Sources
+Part 4A           → Home Screen
+Part 4B           → Search Screen
+Part 4C           → Detail Screen
+Part 4D           → Player Screen
+Part 4E           → Library Screen
+Part 4F           → Extensions Screen (18 repos)
+Part 4G           → Settings Screen
+Part 5            → Onboarding Flow
+Part 6            → Tech Stack (reference only)
+Part 7            → Code Standards (reference only)
+PROMPT A          → AndroidManifest.xml
+PROMPT B          → App Signing + Keystore
+PROMPT C          → Plugin Loader (.cs3 files)
+PROMPT D          → Error Handling + No-Internet
+PROMPT E          → Final Build Audit + APK commands
+PROMPT F          → Auto-Update Extensions on Launch ← NEW
+─────────────────────────────────────────
+TOTAL SESSIONS    → 10
+ESTIMATED TIME    → 2 to 3 weeks

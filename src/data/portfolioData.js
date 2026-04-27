@@ -8,7 +8,7 @@ export const personalInfo = {
   email: 'kevinjt2004@gmail.com',
   phone: '+91 8531013918',
   linkedin: 'https://linkedin.com/in/kevinjt2004',
-  github: 'https://github.com/kevinjt2004',
+  github: 'https://github.com/Kevin-JT',
   location: 'Tamil Nadu, India',
   currentlyLearning: 'Playwright',
   openToWork: true,

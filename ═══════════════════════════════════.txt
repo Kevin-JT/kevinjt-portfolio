@@ -1,0 +1,866 @@
+═══════════════════════════════════════════════════
+PART 0 — APP ICON & IDENTITY
+═══════════════════════════════════════════════════
+
+App Name     : OpenStream
+Package Name : com.openstream.app
+Version      : 1.0.0 (versionCode 1)
+Min SDK      : 21
+Target SDK   : 35
+Language     : Kotlin
+UI Toolkit   : Jetpack Compose + Material3
+
+## App Icon Generation Prompt
+Generate a launcher icon for "OpenStream" with this concept:
+- A bold, stylized play button (▶) formed by two overlapping
+  chevrons pointing right, creating a sense of speed and streaming
+- The chevrons should use a gradient from electric blue (#00B4FF)
+  to deep violet (#7B2FFF)
+- Background: pure black circle (#000000) for adaptive icon
+- NO clouds, NO stream waves, NO letters — icon only
+- Style: modern, minimal, flat with a subtle inner glow
+- Export in all required Android densities:
+  mdpi (48x48), hdpi (72x72), xhdpi (96x96),
+  xxhdpi (144x144), xxxhdpi (192x192)
+- Provide both ic_launcher.png and ic_launcher_round.png
+- Foreground layer for adaptive icon: the chevron mark only
+- Background layer: solid #000000
+
+═══════════════════════════════════════════════════
+PART 1 — PROJECT SCAFFOLD
+═══════════════════════════════════════════════════
+
+Create full project with these modules:
+  :app          → Main Android app
+  :library      → Core shared logic, models, APIs
+  :extensions   → Extension manager module
+  :docs         → Documentation only (no code)
+
+Files to generate fresh (do NOT copy from CloudStream):
+  - README.md (OpenStream branding)
+  - LICENSE (Apache 2.0)
+  - CONTRIBUTING.md
+  - AI-POLICY.md
+  - .gitignore
+  - gradle.properties
+  - settings.gradle.kts → rootProject.name = "OpenStream"
+  - build.gradle.kts (top-level)
+  - discoverium.yml → app name: OpenStream
+
+═══════════════════════════════════════════════════
+PART 2 — DESIGN SYSTEM (ShuttleTV-Inspired)
+═══════════════════════════════════════════════════
+
+Build a Compose Theme in ui/theme/ with these exact tokens:
+
+Colors:
+  Background        : #0B0B0B  (near black)
+  Surface           : #161616  (card background)
+  SurfaceVariant    : #1F1F1F  (elevated surface)
+  Primary           : #00B4FF  (electric blue — CTA, active tabs)
+  PrimaryVariant    : #7B2FFF  (violet — gradients, accents)
+  OnPrimary         : #FFFFFF
+  Secondary         : #2A2A2A  (chip/button fill)
+  OnBackground      : #F0F0F0  (primary text)
+  OnSurface         : #A0A0A0  (secondary/meta text)
+  Divider           : #2C2C2C
+  Error             : #FF4C4C
+  Downloaded        : #00E676  (green — only for download badge, not status)
+  Rating            : #FFD700  (star gold)
+
+Light Theme Colors (White Mode):
+  Background        : #F5F5F5
+  Surface           : #FFFFFF
+  SurfaceVariant    : #EEEEEE
+  Primary           : #0090CC  (slightly deeper blue for contrast on white)
+  PrimaryVariant    : #6A1FDD  (violet)
+  OnPrimary         : #FFFFFF
+  Secondary         : #E0E0E0
+  OnBackground      : #111111  (primary text)
+  OnSurface         : #666666  (meta/secondary text)
+  Divider           : #DDDDDD
+  Error             : #D32F2F
+  Downloaded        : #00A550
+  Rating            : #F5A623
+
+Theme Switching Rules:
+  - Support 3 modes in Settings → Appearance:
+      · Dark   (default — the #0B0B0B palette)
+      · AMOLED (pure #000000 background, max battery saving on OLED)
+      · Light  (the #F5F5F5 palette above)
+      · System (follows Android system day/night setting)
+  - Store selected theme in DataStore key: "app_theme"
+  - Apply via DynamicTheme composable wrapping the entire NavHost
+  - Hero banner gradient fade:
+      · Dark/AMOLED → fade to #0B0B0B / #000000
+      · Light       → fade to #F5F5F5
+  - Card shadow:
+      · Dark  → no shadow, use surface border (#2C2C2C)
+      · Light → 4dp elevation shadow, no border
+  - Top navbar:
+      · Dark  → #161616 background
+      · Light → #FFFFFF background with bottom divider line
+
+Typography:
+  HeroTitle    : 28sp Bold    White
+  SectionTitle : 16sp SemiBold White
+  CardTitle    : 13sp Medium  White (max 2 lines, ellipsis)
+  MetaText     : 11sp Regular #A0A0A0
+  ButtonLabel  : 14sp SemiBold
+
+Shapes:
+  Card         : 10dp rounded
+  Chip         : 20dp (pill)
+  BottomSheet  : 16dp top corners only
+  Button       : 8dp
+
+Icons — Use Lucide or Phosphor icon set throughout.
+DO NOT use any icon that appears in CloudStream:
+  Home        → use House icon (not grid)
+  Search      → use MagnifyingGlass
+  Library     → use BookmarkSimple
+  Extensions  → use PuzzlePiece
+  Settings    → use SlidersHorizontal
+  Play        → use PlayCircle (filled)
+  Download    → use CloudArrowDown
+  Delete      → use Trash (not X)
+  Installed   → use CheckCircle
+  Back        → use ArrowLeft
+  More info   → use DotsThreeVertical
+
+═══════════════════════════════════════════════════
+PART 3 — NAVIGATION ARCHITECTURE
+═══════════════════════════════════════════════════
+
+Use a TOP navigation bar (not bottom nav), exactly like ShuttleTV:
+
+TopBar layout:
+  Left  : OpenStream logo (text logo, styled with gradient Primary→PrimaryVariant)
+  Center: Tab pills → [ Movies | TV Shows | Anime | Live TV ]
+          Active tab: filled blue pill, inactive: ghost text
+  Right : Search icon + Profile avatar (or person icon if not logged in)
+
+Screen destinations (NavHost):
+  home, movies, tvshows, anime, livetv,
+  search, detail/{id}, player/{id},
+  library, extensions, settings
+
+Full-screen player hides the top bar completely.
+
+═══════════════════════════════════════════════════
+PART 4 — SCREEN-BY-SCREEN UI SPEC
+═══════════════════════════════════════════════════
+
+──────────────────────────────
+4A. HOME SCREEN
+──────────────────────────────
+- Full-width Hero Banner (ViewPager, auto-cycles every 5s)
+  · Backdrop image fills full width, aspect 16:9
+  · Bottom gradient fade to #0B0B0B
+  · Overlay: Title (HeroTitle), genre chips row,
+    rating badge (⭐ 8.4), year + runtime metadata
+  · Two buttons: [▶ Watch Now] (filled blue) + [＋ Watchlist] (outlined)
+  · Dot indicators centered below banner
+
+- Below banner, vertical scroll of labeled carousels:
+  · "Trending Now"
+  · "Newly Added"
+  · "Top Rated Movies"
+  · "Popular Anime"
+  · "Live TV Channels"
+  · "Because You Watched [X]" (AI row — only if history exists)
+
+- Each carousel:
+  · Section header: title left, "See All →" right (blue)
+  · Horizontal LazyRow, no snap, edge fade on right
+  · Card: 110×165dp portrait poster, 10dp rounded corners
+    NO title below card — title only on hover/tap overlay
+  · Long press → bottom sheet: poster + title + year + genre
+    + [▶ Watch] + [＋ Watchlist] + [⬇ Download]
+
+──────────────────────────────
+4B. SEARCH SCREEN
+──────────────────────────────
+- Full-screen with auto-focused search bar at top
+  Placeholder: "Search movies, shows, anime..."
+  Leading: MagnifyingGlass icon, trailing: X to clear
+- Below bar: filter chips (All | Movies | TV | Anime | Live)
+- Results: 3-column LazyVerticalGrid of poster cards
+- Empty/initial state: "Trending Searches" as scrollable pill tags
+- No results state: illustrated empty icon + "Nothing found for X"
+- Search is local across all installed extensions simultaneously
+
+──────────────────────────────
+4C. DETAIL SCREEN
+──────────────────────────────
+- Full-bleed backdrop at top (blurred, fades into background)
+- Floating back arrow (top-left, semi-transparent pill)
+- Below fold:
+  · Title (HeroTitle) + tagline (italic, muted)
+  · Row: Year | Runtime | Language | IMDB badge
+  · Genre chips (horizontal scroll)
+  · Synopsis: 3 lines collapsed, "More" tap to expand
+  · Two buttons: [▶ Play Now] + [⬇ Download]
+  · [＋ Add to Watchlist] text button
+  · Cast/Crew: horizontal scroll of circular avatars + name
+
+- For TV Shows / Anime:
+  · Season dropdown selector
+  · Episode list: thumbnail + ep number + title + duration
+  · "Mark all watched" option
+
+- "More Like This" carousel at bottom (same source)
+
+──────────────────────────────
+4D. PLAYER SCREEN
+──────────────────────────────
+- True fullscreen, hide system bars and top navbar
+- Tap to toggle controls (auto-hide after 3 seconds)
+- Controls overlay:
+  · Top: title + back arrow + quality badge (1080p)
+  · Center row: ⏮ -10s | ▶/⏸ (large 72dp) | ⏭ +10s
+  · Bottom: progress scrubber (with chapter markers if available)
+    time elapsed / total · quality selector · subtitles ·
+    PiP button · fullscreen toggle
+- Gestures:
+  · Double tap left edge  = seek -10s
+  · Double tap right edge = seek +10s
+  · Swipe up/down right   = volume
+  · Swipe up/down left    = brightness
+  · Swipe down (center)   = dismiss player
+- Speed selector: 0.5× 0.75× 1× 1.25× 1.5× 2×
+- Auto-play next episode with 10s countdown + cancel button
+
+──────────────────────────────
+4E. LIBRARY SCREEN
+──────────────────────────────
+- Two tabs: [Bookmarks] [Downloads]
+- Bookmarks tab:
+  · Status filter pills: All | Watching | Completed | Plan to Watch
+  · 2-column poster grid
+  · Progress bar overlay on in-progress items
+- Downloads tab:
+  · Category filter: All | Movies | TV Shows | Anime | Audio
+  · List view: thumbnail + title + file size + quality + delete button
+  · Delete swipe gesture (right-to-left) with undo snackbar
+- Empty states: unique illustration per tab, not generic text
+
+📦 BACKUP & RESTORE
+
+Add a section at top of Library screen:
+
+[Backup Data]  [Restore Data]
+
+Backup:
+- Export all user data:
+  • Watch history
+  • Continue watching
+  • Watchlist
+  • Downloads metadata
+- Format: JSON serialized into .txt file
+- Allow user to choose storage location
+
+Restore:
+- User selects .txt file
+- Validate JSON structure
+- Restore all data into Room DB
+- Show success/failure message
+
+Rules:
+- Must work after uninstall/reinstall
+- Must not overwrite data without confirmation
+
+──────────────────────────────
+4F. EXTENSIONS SCREEN  ← KEY FEATURE
+──────────────────────────────
+This is the most important differentiator from CloudStream.
+ALL repositories and their extensions are pre-listed by default.
+Users do NOT need to add any repo URL manually.
+
+Layout:
+- Header: "Extensions" title + search bar for filtering
+- Filter chips: All | Installed | Not Installed | By Language
+- Language group headers (collapsible):
+  · English, Hindi, Indonesian, Italian, German, Turkish,
+    Ukrainian, Vietnamese, Bengali, Portuguese, Multi-language
+
+For each extension card show:
+  · Extension icon (fetched from repo JSON)
+  · Extension name (CardTitle)
+  · Repository it belongs to (meta text, muted)
+  · Language tag chip
+  · Content type tag (Movies / Anime / Live TV / etc.)
+  · Status badge:
+    - "Installed" (green CheckCircle icon + text)
+    - "Not Installed" (grey, outlined)
+    - "Update Available" (blue, CloudArrowDown icon)
+  · Action button on the right:
+    - If not installed: [⬇ Install] — outlined blue button
+    - If installed    : [🗑 Remove] — outlined red button
+    NOTE: "Remove" deactivates the extension in-app only.
+          The extension data is NOT permanently deleted from
+          the device. User can re-install anytime without
+          re-downloading the repo. Store state in Room DB.
+  · Tap card body → extension detail bottom sheet:
+    shows full description, version, last updated, source URL
+
+Pre-load ALL these repositories and their extensions at first launch
+by fetching their repo.json files:
+
+  Repository Name                   | JSON URL
+  ──────────────────────────────────|──────────────────────────────────
+  CloudStream Providers             | https://raw.githubusercontent.com/recloudstream/extensions/master/repo.json
+  Mega Repository                   | https://raw.githubusercontent.com/self-similarity/MegaRepo/builds/repo.json
+  Phisher Repo                      | https://raw.githubusercontent.com/phisher98/cloudstream-extensions-phisher/refs/heads/builds/repo.json
+  Megix Repo (Hindi & English)      | https://raw.githubusercontent.com/SaurabhKaperwan/CSX/builds/CS.json
+  IndoStream Repo                   | https://raw.githubusercontent.com/TeKuma25/IndoStream/builds/repo.json
+  Italian Providers                 | https://raw.githubusercontent.com/Gian-Fr/ItalianProvider/builds/repo.json
+  CNC Verse Repository              | https://raw.githubusercontent.com/NivinCNC/CNCVerse-Cloud-Stream-Extension/refs/heads/builds/CNC.json
+  Redowan's BDIX                    | https://raw.githubusercontent.com/redowan99/Redowan-CloudStream/master/repo.json
+  German Providers                  | https://raw.githubusercontent.com/Bnyro/GermanProviders/refs/heads/master/repo.json
+  Saimuel Repo                      | https://raw.githubusercontent.com/saimuelbr/saimuelrepo/refs/heads/main/builds/repo.json
+  CakesTwix Provider                | https://raw.githubusercontent.com/CakesTwix/cloudstream-extensions-uk/master/repo.json
+  doGior's Had Enough               | https://raw.githubusercontent.com/doGior/doGiorsHadEnough/refs/heads/builds/repo.json
+  Turkish Providers                 | https://raw.githubusercontent.com/Kraptor123/cs-kraptor/refs/heads/master/repo.json
+  Luna712 Extensions                | https://raw.githubusercontent.com/Luna712/Luna712-CloudStream-Extensions/28885d17ceb7f24782b732b6056085c14c1fd027/repo.json
+  CuxPlug                           | https://raw.githubusercontent.com/ycngmn/CuxPlug/refs/heads/main/repo.json
+  DiziPal & TabiiSpor               | https://raw.githubusercontent.com/sarapcanagii/Pitipitii/master/repo.json
+  CloudStream Vietnamese            | https://gitlab.com/tearrs/cloudstream-vietnamese/-/raw/main/repo.json
+  King                              | https://pastebin.com/raw/Cd2g2tfz
+
+Extension loading logic:
+  1. On first launch, fetch all repo.json URLs above in parallel
+  2. Parse each JSON → extract extension list (name, iconUrl,
+     description, version, language, type, apkUrl)
+  3. Store everything in Room DB table: `extensions`
+  4. Show all extensions on the Extensions screen immediately
+  5. "Install" = download the .apk/.cs3 plugin file and activate
+  6. "Remove" = mark as inactive in DB, keep file if already downloaded
+  7. Background refresh repo JSONs every 24h for update detection
+  8. Show update badge on Extensions tab icon when updates exist
+
+──────────────────────────────
+4G. SETTINGS SCREEN
+──────────────────────────────
+Navigation: tap profile avatar → Settings
+Sections (no drawer, all in one scrollable screen):
+  · Appearance : Dark / AMOLED / System theme | Accent color picker
+  · Playback   : Default quality | Auto-play toggle |
+                 Default subtitle language | Preferred audio track
+  · Downloads  : Storage path | Max parallel downloads | Auto-delete watched
+  · Account    : Connect Simkl | Local profile name
+  · About      : Version | Changelog | Licenses | GitHub link
+
+Language:
+- Dropdown selector (40+ languages)
+- Default: English
+- Store in DataStore → "app_language"
+- Apply instantly without restart
+- Use strings.xml localization
+
+Report a Bug:
+- Input field: user description
+- Toggle: attach logs
+- Include crash logs if available
+- Action:
+  • Share via intent (email/file)
+  • Export logs as .txt
+
+Appearance (Extended):
+- Theme: Dark / AMOLED / Light / System
+- Accent Color Picker (dynamic)
+- Font Scale slider
+- Layout Density: Compact / Comfortable
+
+Store all in DataStore
+Apply instantly across app
+
+App Lock:
+- Enable/Disable toggle
+- Lock types:
+  • PIN
+  • Password
+  • Pattern
+  • Biometric
+
+Rules:
+- Trigger on app open
+- Trigger after inactivity timeout
+- Store securely (Encrypted DataStore)
+- Biometric fallback → PIN/Password
+
+═══════════════════════════════════════════════════
+PART 5 — ONBOARDING FLOW (First Launch Only)
+═══════════════════════════════════════════════════
+
+Screen 1 — Welcome:
+  Full dark screen, OpenStream gradient logo centered,
+  tagline: "Your world of entertainment, open."
+  [Get Started] button at bottom
+
+Screen 2 — Content Preferences:
+  "What do you love watching?"
+  Multi-select grid: Movies | TV Shows | Anime |
+  Live TV | Documentaries | Audiobooks
+  [Continue] enabled after ≥1 selection
+
+Screen 3 — Extensions Loading:
+  "Setting up your sources..."
+  Animated progress bar while fetching all repo.json files in background
+  Show count: "Loaded 47 extensions from 18 repositories"
+  [Continue] enabled when fetch completes (or timeout after 10s)
+
+Screen 4 — Permissions:
+  Storage (for downloads) + Notifications (for download alerts)
+  Each as a clean card with icon + explanation + [Allow] button
+  [Skip for now] link below each
+
+Screen 5 — Ready:
+  Checkmark animation
+  "OpenStream is ready"
+  [Start Watching] → navigate to Home
+  
+Store completion in DataStore: onboarding_complete = true
+
+═══════════════════════════════════════════════════
+PART 6 — TECHNICAL STACK
+═══════════════════════════════════════════════════
+
+  Jetpack Compose       → UI
+  Media3 / ExoPlayer    → Playback
+  Retrofit + OkHttp     → Repo JSON fetching
+  Room                  → Extensions DB + watch history + watchlist
+  DataStore             → Preferences + onboarding state
+  WorkManager           → Downloads + 24h repo refresh
+  Hilt                  → Dependency injection
+  Coil                  → Image loading (posters, extension icons)
+  Kotlin Coroutines + Flow → Async throughout
+  Navigation Compose    → Screen routing
+
+Architecture: MVVM with UseCases per feature
+Package structure:
+  feature/home
+  feature/search
+  feature/detail
+  feature/player
+  feature/library
+  feature/extensions   ← new, core differentiator
+  feature/settings
+  feature/onboarding
+  core/ui/theme
+  core/data/room
+  core/data/network
+  core/domain/usecase
+
+═══════════════════════════════════════════════════
+PART 6A — SYSTEM SERVICES
+═══════════════════════════════════════════════════
+🔄 APP UPDATE CHECK
+
+- On every app launch:
+  • Fetch version JSON from remote endpoint
+  • Compare with current versionCode
+
+- If update available:
+  • Show non-intrusive banner/dialog
+  • Option: "Update Now"
+
+- Run in background (non-blocking)
+- Use WorkManager or App Startup
+- Cache last check timestamp
+
+═══════════════════════════════════════════════════
+PART 7 — CODE STANDARDS
+═══════════════════════════════════════════════════
+
+- No hardcoded strings → strings.xml
+- No hardcoded colors  → theme tokens only
+- No hardcoded dimensions → dimens.xml or Compose tokens
+- Every Composable → contentDescription for accessibility
+- Font sizes in SP only (respect user accessibility settings)
+- Unit tests for all UseCases
+- All Composable previews must work in dark theme
+
+PROMPT A — AndroidManifest.xml (Do This in Session 1)
+Generate the complete AndroidManifest.xml for OpenStream with:
+
+All required permissions:
+<uses-permission android:name="android.permission.INTERNET"/>
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+    android:maxSdkVersion="28"/>
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+    android:maxSdkVersion="32"/>
+<uses-permission android:name="android.permission.READ_MEDIA_VIDEO"
+    android:minSdkVersion="33"/>
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS"
+    android:minSdkVersion="33"/>
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+<uses-permission android:name="android.permission.WAKE_LOCK"/>
+
+Application block must include:
+- android:usesCleartextTraffic="true"  (needed for some stream URLs)
+- android:hardwareAccelerated="true"   (needed for video playback)
+- android:largeHeap="true"             (needed for loading extension JARs)
+- tools:replace="android:label"
+
+MainActivity:
+- Set as LAUNCHER activity
+- android:screenOrientation="unspecified" (player rotates, rest portrait)
+- android:configChanges="orientation|screenSize|keyboardHidden"
+- android:windowSoftInputMode="adjustResize"
+
+Add FileProvider for APK installs (needed for extension downloads):
+- authority: "com.openstream.app.fileprovider"
+- Add res/xml/file_paths.xml with external-files-path for downloads
+
+Add WorkManager initialization provider.
+Add Hilt component in Application class.
+
+Output the complete file with zero placeholders.
+
+PROMPT B — App Signing Setup (Do This Before Building Release)
+Generate the complete signing configuration for OpenStream.
+
+1. Create keystore.properties file in project root:
+   storeFile=openstream.keystore
+   storePassword=OpenStream@2024
+   keyAlias=openstream
+   keyPassword=OpenStream@2024
+
+2. Update app/build.gradle.kts with:
+   - Read keystore.properties using Properties()
+   - signingConfigs block with release config
+   - buildTypes release block using that signingConfig
+   - minifyEnabled = true
+   - proguardFiles with getDefaultProguardFile + proguard-rules.pro
+
+3. Generate proguard-rules.pro that:
+   - Keeps all CloudStream extension API classes
+   - Keeps all Retrofit interface methods
+   - Keeps all Room entity classes  
+   - Keeps all Hilt generated classes
+   - Keeps all Kotlinx serialization classes
+   - Keeps all OkHttp/Okio classes
+   - Keeps MainAPI and all its subclasses (for plugin loader)
+   - Prevents obfuscation of extension-facing interfaces
+
+4. Generate the exact terminal commands to:
+   a. Create the keystore file using keytool
+   b. Build the signed release APK
+   c. Verify the APK is signed correctly
+   d. Find the output APK location
+
+Output every file completely with zero placeholders.
+
+PROMPT C — Plugin Loader (Most Critical — Dedicated Session)
+Implement a complete runtime .cs3 plugin loader for OpenStream.
+This is the most critical feature — without it the app shows no content.
+
+A .cs3 file is a renamed .jar/.dex file containing compiled Kotlin classes
+that extend CloudStream's MainAPI abstract class.
+
+Implement ALL of the following completely:
+
+1. PLUGIN LOADER ENGINE
+   File: core/plugins/PluginLoader.kt
+
+   class PluginLoader @Inject constructor(
+       @ApplicationContext private val context: Context
+   ) {
+       // Use PathClassLoader to load .cs3 file from local storage path
+       // Use reflection to find classes extending MainAPI
+       // Instantiate the plugin class safely
+       // Return a PluginResult (Success/Failure) sealed class
+       // Cache loaded plugins in a HashMap<String, MainAPI>
+       // Handle ClassNotFoundException, NoSuchMethodException gracefully
+       // Log all errors without crashing
+   }
+
+2. MAIN API INTERFACE BRIDGE
+   File: core/plugins/MainAPIBridge.kt
+   
+   Define the interface that all loaded plugins must satisfy:
+   - getName(): String
+   - getMainUrl(): String  
+   - search(query: String): List<SearchResponse>
+   - load(url: String): LoadResponse
+   - getMainPage(page: Int, request: MainPageRequest): HomePageResponse
+   
+   Use reflection to call these methods on loaded plugin instances
+   because the plugin classes are loaded at runtime and not available
+   at compile time.
+
+3. EXTENSION MANAGER
+   File: core/plugins/ExtensionManager.kt
+   
+   - downloadExtension(apkUrl: String, name: String): Flow<DownloadState>
+     · Download .cs3 file to context.getExternalFilesDir("extensions")
+     · Show download progress via Flow
+     · On complete, call PluginLoader.load(filePath)
+     · Update Room DB: isInstalled=true, localPath=filePath
+   
+   - loadAllInstalledExtensions()
+     · Query Room DB for all isInstalled=true extensions
+     · Call PluginLoader for each one
+     · Skip silently if file missing (don't crash)
+   
+   - unloadExtension(pluginId: String)
+     · Remove from PluginLoader cache
+     · Update Room DB: isInstalled=false
+     · Do NOT delete the file
+   
+   - getLoadedPlugins(): List<MainAPI>
+     · Return all currently active plugin instances
+
+4. SEARCH AGGREGATOR
+   File: core/plugins/AggregatedSearch.kt
+   
+   - searchAll(query: String): Flow<List<SearchResponse>>
+     · Call search() on ALL loaded plugins in parallel (async)
+     · Emit results as each plugin responds (don't wait for all)
+     · Catch exceptions per plugin — one failure must not stop others
+     · Merge and deduplicate results by URL
+
+5. HOME PAGE AGGREGATOR  
+   File: core/plugins/HomePageAggregator.kt
+   
+   - getHomePage(): Flow<List<HomeSection>>
+     · Call getMainPage() on all loaded plugins in parallel
+     · Each plugin returns rows (HomeSection with title + items)
+     · Merge all rows into one combined list for the Home screen
+     · Emit loading state, then content state, then done state
+
+6. PLUGIN SECURITY
+   - Only load files from context.getExternalFilesDir("extensions")
+   - Reject any file not ending in .cs3
+   - Wrap every reflection call in try-catch
+   - Never allow a plugin crash to crash the host app
+
+7. VIEWMODEL INTEGRATION
+   Update HomeViewModel to use HomePageAggregator
+   Update SearchViewModel to use AggregatedSearch
+   Both must expose:
+   - UiState sealed class: Loading | Success(data) | Error(message) | Empty
+   - StateFlow<UiState> observed by Compose screens
+
+Output every class completely. No TODOs. No truncation.
+
+PROMPT D — No-Internet & Error Handling
+Add complete error handling throughout OpenStream so the app 
+never crashes regardless of network conditions.
+
+Implement for every network operation:
+
+1. NETWORK STATE MONITOR
+   File: core/network/NetworkMonitor.kt
+   - Use ConnectivityManager to observe network state
+   - Expose isOnline: StateFlow<Boolean>
+   - Inject into all ViewModels that make network calls
+
+2. EXTENSION FETCH ERROR HANDLING
+   In ExtensionRepository.kt:
+   - If device is offline: load from Room DB cache (show cached list)
+   - If one repo JSON fails: skip it, continue others, show warning snackbar
+   - If ALL repos fail: show "Could not refresh. Showing cached extensions."
+   - Never show empty screen if Room DB has any data
+
+3. STREAM LOADING ERROR HANDLING
+   In PlayerViewModel.kt:
+   - If stream URL returns 403/404: show "Source unavailable, try another"
+   - If stream buffers for >15s: show retry button
+   - If ExoPlayer throws PlaybackException: catch, log, show error card
+   - Never crash the player — always recover gracefully
+
+4. IMAGE LOADING ERROR HANDLING
+   Configure Coil globally in Application class:
+   - Placeholder: dark grey shimmer while loading
+   - Error: a placeholder with the OpenStream icon
+   - Fallback: same as error placeholder
+   - Timeout: 10 seconds
+
+5. GLOBAL CRASH PREVENTION
+   In Application class, add Thread.setDefaultUncaughtExceptionHandler
+   that logs the crash to a local file (not a crash service) and 
+   shows a user-friendly "Something went wrong" screen instead of 
+   the system crash dialog.
+
+Output every file completely.
+
+PROMPT E — Final APK Build Verification
+Perform a complete pre-release audit of OpenStream and fix all issues.
+
+Check and fix each of the following:
+
+1. BUILD COMPILATION
+   - Run through every import and confirm no unresolved references
+   - Confirm all Hilt @Inject constructors have matching @Provides or @Binds
+   - Confirm all NavHost destinations match their route strings exactly
+   - Confirm all Room @Entity classes have @PrimaryKey
+   - Confirm all Retrofit interfaces return suspend functions or Call<T>
+
+2. MANIFEST COMPLETENESS CHECK
+   Confirm these all exist in AndroidManifest.xml:
+   ✓ INTERNET permission
+   ✓ FOREGROUND_SERVICE permission
+   ✓ FileProvider with correct authority
+   ✓ android:usesCleartextTraffic="true"
+   ✓ android:largeHeap="true"
+   ✓ WorkManager initializer
+
+3. GRADLE DEPENDENCIES CHECK
+   Confirm app/build.gradle.kts includes:
+   ✓ implementation(libs.androidx.media3.exoplayer)
+   ✓ implementation(libs.androidx.media3.ui)
+   ✓ implementation(libs.hilt.android)
+   ✓ kapt(libs.hilt.compiler)
+   ✓ implementation(libs.room.runtime)
+   ✓ implementation(libs.room.ktx)
+   ✓ kapt(libs.room.compiler)
+   ✓ implementation(libs.retrofit)
+   ✓ implementation(libs.coil.compose)
+   ✓ implementation(libs.work.runtime.ktx)
+   ✓ implementation(libs.datastore.preferences)
+
+4. PROGUARD CHECK
+   Confirm proguard-rules.pro keeps:
+   ✓ MainAPI and all subclasses
+   ✓ All Room entities
+   ✓ All Retrofit interfaces
+   ✓ Kotlinx serialization
+
+5. OUTPUT
+   Generate the exact terminal commands in order to:
+   Step 1: Clean the project      → ./gradlew clean
+   Step 2: Run all unit tests     → ./gradlew test
+   Step 3: Build debug APK first  → ./gradlew assembleDebug
+   Step 4: Install on device      → adb install app/build/outputs/apk/debug/app-debug.apk
+   Step 5: Build release APK      → ./gradlew assembleRelease
+   Step 6: Verify APK signature   → apksigner verify --verbose app-release.apk
+   Step 7: Find the APK           → exact file path on your machine
+   
+   Also generate the ADB command to check for crashes in real time:
+   → adb logcat -s "OpenStream" "*:E"
+PROMPT F — Auto-Update Extensions on Every App Open
+Implement automatic extension updates for OpenStream.
+Every time the user opens the app, all installed extensions 
+must silently check for updates and update themselves in the background.
+
+Implement ALL of the following completely:
+
+1. APP STARTUP TRIGGER
+   File: core/startup/ExtensionUpdateInitializer.kt
+   
+   - Use AndroidX App Startup (Initializer<Unit>) so this runs
+     automatically every time the app process starts
+   - Do NOT block the main thread — launch in background coroutine
+   - Call ExtensionUpdateManager.checkAndUpdateAll()
+   - Register in AndroidManifest.xml under:
+     <provider android:name="androidx.startup.InitializationProvider">
+       with meta-data pointing to ExtensionUpdateInitializer
+
+2. EXTENSION UPDATE MANAGER
+   File: core/plugins/ExtensionUpdateManager.kt
+
+   class ExtensionUpdateManager @Inject constructor(
+       private val extensionRepository: ExtensionRepository,
+       private val pluginLoader: PluginLoader,
+       private val networkMonitor: NetworkMonitor,
+       @ApplicationContext private val context: Context
+   ) {
+       // checkAndUpdateAll():
+       // Step 1: Check if device is online — if offline, skip silently
+       // Step 2: Fetch all repo.json URLs in parallel (same 18 repos)
+       // Step 3: For each extension in the JSON:
+       //         - Compare version in JSON vs version stored in Room DB
+       //         - If JSON version > stored version AND isInstalled = true:
+       //           mark as UPDATE_AVAILABLE in Room DB
+       // Step 4: For each extension marked UPDATE_AVAILABLE:
+       //         - Download new .cs3 file silently (no dialog)
+       //         - Replace old file at same localPath
+       //         - Call PluginLoader.reload(pluginId) to hot-swap the plugin
+       //         - Update Room DB: version = new version, 
+       //                           status = INSTALLED,
+       //                           lastUpdated = now
+       // Step 5: Emit UpdateResult:
+       //         UpdateResult.Success(updatedCount: Int)
+       //         UpdateResult.NoUpdates
+       //         UpdateResult.Offline
+       //         UpdateResult.PartialFailure(failed: List<String>)
+       
+       // hotReloadPlugin(pluginId: String, newFilePath: String):
+       // - Unload old plugin from PluginLoader cache
+       // - Load new file using PathClassLoader
+       // - Replace entry in loaded plugins map
+       // - Do NOT restart the app
+       // - Do NOT interrupt any active playback
+   }
+
+3. ROOM DB CHANGES
+   Update ExtensionEntity to include:
+   - version: String          (e.g. "1.0.4")
+   - lastUpdated: Long        (epoch millis)
+   - updateAvailable: Boolean (default false)
+   - localPath: String?       (path to downloaded .cs3 file)
+   - status: ExtensionStatus  (enum: NOT_INSTALLED, INSTALLED, 
+                                      UPDATING, UPDATE_AVAILABLE, FAILED)
+
+   Add ExtensionStatus enum:
+   enum class ExtensionStatus {
+       NOT_INSTALLED, INSTALLED, UPDATING, UPDATE_AVAILABLE, FAILED
+   }
+
+4. UI — UPDATE INDICATOR ON EXTENSIONS SCREEN
+   In the Extensions screen (feature/extensions):
+   
+   - Show a small animated blue dot badge on the Extensions tab icon
+     in the top navbar whenever updateAvailable count > 0
+   - On the extension card:
+     · If status = UPDATING: show CircularProgressIndicator (small, 16dp)
+       replacing the action button, with text "Updating..."
+     · If status = UPDATE_AVAILABLE: show [↑ Update] button in blue
+       (in case auto-update failed, user can trigger manually)
+     · If status = INSTALLED and recently updated (within last 60s):
+       show a brief "Updated ✓" text that fades out after 2 seconds
+   - At top of Extensions screen, show a dismissible info banner:
+     "X extensions updated" — auto-dismisses after 4 seconds
+     Only show if updatedCount > 0
+
+5. NOTIFICATION (Optional but important)
+   File: core/notifications/UpdateNotificationManager.kt
+   
+   - Only show a notification if 1 or more extensions were updated
+   - Notification content:
+     Title : "OpenStream — Extensions Updated"
+     Body  : "3 extensions were updated in the background"
+     Icon  : the CloudArrowDown icon
+     Tap   : opens Extensions screen directly
+   - Use NotificationChannel: "extension_updates"
+     Importance: IMPORTANCE_LOW (silent, no sound)
+   - Only show on Android 8.0+ (API 26+)
+   - Request POST_NOTIFICATIONS permission on Android 13+ (API 33+)
+     as part of the existing onboarding permissions screen
+
+6. FAILURE RECOVERY
+   - If a single extension update download fails:
+     · Keep the OLD version loaded and working
+     · Mark status = UPDATE_AVAILABLE again (retry next launch)
+     · Log error to local file, never crash
+   - If PluginLoader fails to load new version:
+     · Automatically rollback to old .cs3 file (keep a .cs3.bak backup)
+     · Log: "Rollback to previous version of [ExtensionName]"
+   - If all 18 repo fetches fail:
+     · Skip silently, no error shown to user
+     · Retry at next app launch
+
+7. SETTINGS TOGGLE
+   In Settings screen → Playback section, add:
+   "Auto-update extensions" toggle (ON by default)
+   Store in DataStore key: "auto_update_extensions"
+   If OFF: skip ExtensionUpdateInitializer entirely on startup
+   If ON: run as described above
+
+Output every file completely. No TODOs. No truncation.
+Tell me which file each class goes in.
+
