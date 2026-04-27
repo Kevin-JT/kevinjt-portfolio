@@ -14,14 +14,14 @@ const contactLinks = [
   {
     icon: Linkedin,
     label: 'LinkedIn',
-    value: 'linkedin.com/in/kevinjt2004',
+    value: 'linkedin.com/in/kevin-jt',
     href: 'https://linkedin.com/in/kevin-jt',
     color: 'text-accent',
   },
   {
     icon: Github,
     label: 'GitHub',
-    value: 'github.com/kevinjt2004',
+    value: 'github.com/Kevin-jt',
     href: 'https://github.com/Kevin-JT',
     color: 'text-accent',
   },
