@@ -1,0 +1,290 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Root & Scrollbar ─── */
+:root {
+  --accent: #00E5A0;
+  --accent-dim: #00B37D;
+  --bg: #060C18;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg);
+  color: #94A3B8;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #060C18;
+}
+::-webkit-scrollbar-thumb {
+  background: #1A2840;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00E5A0;
+}
+
+/* ─── Dot Grid Background ─── */
+.dot-grid {
+  background-image: radial-gradient(circle, #1A2840 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* ─── Noise Texture Overlay ─── */
+.noise::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+/* ─── Gradient Text ─── */
+.gradient-text {
+  background: linear-gradient(135deg, #00E5A0 0%, #22D3EE 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-warm {
+  background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Glow Border ─── */
+.glow-border {
+  border: 1px solid rgba(0, 229, 160, 0.3);
+  box-shadow: 0 0 20px rgba(0, 229, 160, 0.08), inset 0 0 20px rgba(0, 229, 160, 0.03);
+}
+
+.glow-border:hover {
+  border-color: rgba(0, 229, 160, 0.6);
+  box-shadow: 0 0 30px rgba(0, 229, 160, 0.18), inset 0 0 20px rgba(0, 229, 160, 0.06);
+}
+
+/* ─── Skill Badge ─── */
+.skill-badge {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.72rem;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  border: 1px solid;
+  letter-spacing: 0.05em;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: default;
+}
+
+/* ─── Section Reveal Animations ─── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+
+/* ─── Terminal Cursor ─── */
+.cursor::after {
+  content: '|';
+  animation: blink 1s step-end infinite;
+  color: #00E5A0;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ─── Navbar ─── */
+.nav-link {
+  position: relative;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.8rem;
+  color: #4A5A7A;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  letter-spacing: 0.08em;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: #00E5A0;
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #00E5A0;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* ─── Progress bar for skills ─── */
+.skill-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #00E5A0, #22D3EE);
+  transition: width 1.2s ease;
+}
+
+/* ─── Timeline connector ─── */
+.timeline-line {
+  position: absolute;
+  left: 19px;
+  top: 36px;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, #00E5A0 0%, transparent 100%);
+}
+
+/* ─── Card hover lift ─── */
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 30px rgba(0,229,160,0.1);
+}
+
+/* ─── Form input ─── */
+.form-input {
+  background: #0B1221;
+  border: 1px solid #1A2840;
+  color: #E2E8F0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  outline: none;
+}
+
+.form-input::placeholder {
+  color: #4A5A7A;
+}
+
+.form-input:focus {
+  border-color: #00E5A0;
+  box-shadow: 0 0 0 3px rgba(0, 229, 160, 0.1);
+}
+
+/* ─── Accent Button ─── */
+.btn-accent {
+  background: linear-gradient(135deg, #00E5A0, #22D3EE);
+  color: #060C18;
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  border-radius: 8px;
+  padding: 12px 24px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-accent:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 229, 160, 0.4);
+}
+
+.btn-outline {
+  background: transparent;
+  color: #00E5A0;
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  border-radius: 8px;
+  padding: 12px 24px;
+  border: 1px solid rgba(0, 229, 160, 0.4);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-outline:hover {
+  background: rgba(0, 229, 160, 0.08);
+  border-color: #00E5A0;
+  transform: translateY(-2px);
+}
+
+/* ─── Section Label ─── */
+.section-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: #00E5A0;
+  text-transform: uppercase;
+}
+
+/* ─── Status dot ─── */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #00E5A0;
+  box-shadow: 0 0 8px #00E5A0;
+  animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 0 8px #00E5A0; }
+  50%       { box-shadow: 0 0 16px #00E5A0, 0 0 24px rgba(0,229,160,0.4); }
+}
+
+/* ─── Mobile menu ─── */
+@media (max-width: 768px) {
+  .mobile-menu {
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 12, 24, 0.98);
+    backdrop-filter: blur(12px);
+    z-index: 99;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+  }
+  .mobile-menu .nav-link {
+    font-size: 1.2rem;
+    color: #E2E8F0;
+  }
+}
